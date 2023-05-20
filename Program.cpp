@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
     std::string firstArg(argv[1]);
     if(argc > 1 && firstArg == "-h") { std::cout << helpString << std::endl; }
 
+    std::string tmp = "";
+    std::cin >> tmp;
     system("pause");
     return 0;
 }
