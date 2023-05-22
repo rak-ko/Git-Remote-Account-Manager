@@ -13,6 +13,20 @@ namespace GAM
                 return ID;
             }
         }
+        public string _username
+        {
+            get
+            {
+                return username;
+            }
+        }
+        public string _email
+        {
+            get
+            {
+                return email;
+            }
+        }
 
         public Account(ulong ID, string username, string email)
         {

@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using Newtonsoft.Json;
 
 namespace GAM
 {
@@ -8,9 +8,9 @@ namespace GAM
         -u Current use account\n
         -s [account id] Set current account\n
         -l List all accounts\n
-        -i [file path] Import accounts from *.gam file\n
+        -i [file path] Import accounts from *.json file\n
         -e [account id] Edit user\n
-        -gamLoc Get .gam file location\n
+        -saveLoc Get .json account file location\n
         -h Help";
         static Account? currentAccount;
         static List<Account> accounts = new List<Account>();
@@ -32,6 +32,7 @@ namespace GAM
                         PrintCurrentAccount();
                         break;
                     case "-s":
+                        SetAccountConsole(args);
                         break;
                 }
             }
@@ -48,15 +49,27 @@ namespace GAM
             if(args.Length < 2) { Console.WriteLine("Not enough arguments"); return; }
             else
             {
-                if(ulong.TryParse(args[1], out ulong id)) { SetCurrentAccount(id); }
-                else { Console.WriteLine("ID not an integer"); return; }
+                if(ulong.TryParse(args[1], out ulong id))
+                { 
+                    bool result = SetCurrentAccount(id);
+                    Console.WriteLine((result) ? "Account changed" : "Account doesn't exist");
+                }
+                else { Console.WriteLine("ID is not an integer"); return; }
             }
         }
 
         //commands
-        static void SetCurrentAccount(ulong id)
+        static bool SetCurrentAccount(ulong id)
         {
+            int index = accounts.FindIndex(x => x._ID == id);
+            if(index != -1) { return false;  }
+            currentAccount = accounts[index];
 
+            //change git
+            System.Diagnostics.Process.Start("CMD.exe", "git config --global user.name" + currentAccount._username);
+            System.Diagnostics.Process.Start("CMD.exe", "git config --global user.email" + currentAccount._email);
+
+            return true;
         }
         /// <returns>returns public key</returns>
         static string CreateAccount(string username, string email)
@@ -66,15 +79,18 @@ namespace GAM
             accounts.Add(newAccount);
 
             //generate ssh keys
-            
+            string publicKey = "";
 
             SaveAccount(newAccount);
-
-            return "";
+            return publicKey;
         }
         static void SaveAccount(Account account)
         {
-            
+            string fileContents = "";
+            for (int i = 0; i < accounts.Count; i++)
+            {
+                // fileContents += 
+            }
         }
     }
 }
