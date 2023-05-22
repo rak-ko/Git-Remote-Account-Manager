@@ -9,7 +9,12 @@
         "cwd": "${workspaceRoot}",
         "args": [],
         "stopAtEntry": false,
-        "environment": [],
+        "environment": [
+            {
+                "name": "config",
+                "value": "Debug"
+            }
+        ],
         "externalConsole": true,
         "MIMode": "gdb",
         "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
