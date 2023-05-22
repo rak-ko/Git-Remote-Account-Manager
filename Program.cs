@@ -5,7 +5,7 @@ namespace GAM
 {
     class Program
     {
-        //test xd 2
+        //TODO: rsa keys are useless (maybe just use the ssh-keygen command to generate them)
 
         const string helpString = "-c [username] [email (connected to your remote git account)] Create new account\n" +
         "-u Current use account\n" +
