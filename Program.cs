@@ -5,7 +5,7 @@ namespace GAM
 {
     class Program
     {
-        //test xd
+        //test xd 2
 
         const string helpString = "-c [username] [email (connected to your remote git account)] Create new account\n" +
         "-u Current use account\n" +
