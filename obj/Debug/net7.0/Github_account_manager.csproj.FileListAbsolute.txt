@@ -1,0 +1,15 @@
+C:\Users\sebik\Documents\GitHub\Github_account_manager\bin\Debug\net7.0\Github_account_manager.exe
+C:\Users\sebik\Documents\GitHub\Github_account_manager\bin\Debug\net7.0\Github_account_manager.deps.json
+C:\Users\sebik\Documents\GitHub\Github_account_manager\bin\Debug\net7.0\Github_account_manager.runtimeconfig.json
+C:\Users\sebik\Documents\GitHub\Github_account_manager\bin\Debug\net7.0\Github_account_manager.dll
+C:\Users\sebik\Documents\GitHub\Github_account_manager\bin\Debug\net7.0\Github_account_manager.pdb
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.csproj.AssemblyReference.cache
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.AssemblyInfoInputs.cache
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.AssemblyInfo.cs
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.csproj.CoreCompileInputs.cache
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.dll
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\refint\Github_account_manager.dll
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.pdb
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\Github_account_manager.genruntimeconfig.cache
+C:\Users\sebik\Documents\GitHub\Github_account_manager\obj\Debug\net7.0\ref\Github_account_manager.dll
