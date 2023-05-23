@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
+using System.IO;
+using System.Security.AccessControl;
 
 namespace GAM
 {
     class Program
     {
-        //TODO: rsa keys are useless (maybe just use the ssh-keygen command to generate them)
-
         const string helpString = "-c [username] [email (connected to your remote git account)] Create new account\n" +
         "-u Current use account\n" +
         "-s [account id] Set current account\n" +
@@ -15,6 +15,7 @@ namespace GAM
         "-e [account id] Edit user\n" +
         "-r [account id] Remove user\n" +
         "-saveLoc Get .json account file location\n" +
+        "-rConf Restores ssh config \n" +
         "-h Help";
         const string accountsFilePath = "gamAccounts.json";
 
@@ -104,6 +105,10 @@ namespace GAM
                     case "-i":
                         ImportAccountConsole(args);
                         break;
+                    case "-rConf":
+                        RestoreSSHConfig();
+                        Console.WriteLine("SSH config restored");
+                        break;
                     default:
                         Console.WriteLine("Unknown command");
                         break;
@@ -134,8 +139,8 @@ namespace GAM
         static void CreateAccountConsole(string[] args)
         {
             if(args.Length < 3) { Console.WriteLine("Not enough arguments"); return; }
-            string publicKey = CreateAccount(args[1], args[2]);
-            Console.WriteLine("\nPublic key:\n" + publicKey + "\nAdd this to your git remote account.");
+            CreateAccount(args[1], args[2]);
+            Console.WriteLine("Take the public key and add it to your git remote account");
         }
         static void EditAccountConsole(string[] args)
         {
@@ -198,21 +203,24 @@ namespace GAM
             {
                 StartInfo = 
                 {
-                    FileName = "git",
-                    WorkingDirectory = @"C:\",
-                    Arguments = "config --global user.name " + currentAccount._username
+                    FileName = "cmd.exe",
+                    Arguments = "/c git config --global user.name " + currentAccount._username
                 }
-            }.Start();
+            };
+            p1.Start();
+            p1.WaitForExit();
             var p2 = new Process
             {
                 StartInfo = 
                 {
-                    FileName = "git",
-                    WorkingDirectory = @"C:\",
-                    Arguments = "config --global user.email " + currentAccount._email
+                    FileName = "cmd.exe",
+                    Arguments = "/c git config --global user.email " + currentAccount._email
                 }
-            }.Start();
+            };
+            p2.Start();
+            p2.WaitForExit();
             
+            RestoreSSHConfig();
             return true;
         }
         static bool RemoveAccount(ulong id)
@@ -220,9 +228,20 @@ namespace GAM
             int index = accounts.FindIndex(x => x._ID == id);
             if(index == -1) { return false; }
             Account account = accounts[index];
-            if(File.Exists(account._privateKeyPath)) { File.Delete(account._privateKeyPath); }
-            if(File.Exists(account._publicKeyPath)) { File.Delete(account._publicKeyPath); }
+            //set new current account
+            if(currentAccount == account && accounts.Count > 0) 
+            { 
+                for (int i = 0; i < accounts.Count; i++)
+                {
+                    if(accounts[i] != currentAccount)
+                    {
+                        SetCurrentAccount(accounts[i]._ID);
+                        break;
+                    }
+                }
+            }
             accounts.Remove(account);
+            RestoreSSHConfig();
             SaveAccounts();
             return true;
         }
@@ -246,68 +265,40 @@ namespace GAM
             return (true, newAccounts.Count);
         }
         /// <returns>returns public key</returns>
-        static string CreateAccount(string username, string email)
+        static void CreateAccount(string username, string email)
         {
             ulong curHighestID = (accounts.Count > 0) ? accounts.Max(x => x._ID) : 0;
 
             //generate ssh keys
-            // string? password = Console.ReadLine();
-            SshKeyGenerator.SshKeyGenerator keyGenerator = new SshKeyGenerator.SshKeyGenerator(4096);
-            string privateKey = keyGenerator.ToPrivateKey();
-            string publicKey = keyGenerator.ToRfcPublicKey(email);
-
-            //save keys
-            string sshPath = "C:\\Users\\sebik/.ssh/";
-            int counter = 0;
-            Random rnd = new Random();
+            Process p = new Process
+            {
+                StartInfo = 
+                {
+                    FileName = "cmd.exe",
+                    Arguments = "/c ssh-keygen -t ed25519 -C \"" + email + "\""
+                }
+            };
+            p.Start();
+            p.WaitForExit();
+            
+            string prvKeyPath = "";
             while(true)
             {
-                string numbersAfter = rnd.Next(int.MinValue, int.MaxValue).ToString();
-                string prvKeyPath = sshPath + "id_rsa" + numbersAfter;
-                string pubKeyPath = sshPath + "id_rsa" + numbersAfter + ".pub";
-                if(!File.Exists(prvKeyPath) && !File.Exists(pubKeyPath))
+                Console.Write("Please enter the full path of your new private key >>> ");
+                string? path = Console.ReadLine();
+                if(path == null || !File.Exists(path)) { Console.WriteLine("Not a key"); }
+                else
                 {
-                    //save to file
-                    Directory.CreateDirectory(sshPath);
-                    using(StreamWriter streamWriter = new StreamWriter(prvKeyPath)) {}
-                    using(StreamWriter streamWriter = new StreamWriter(pubKeyPath)) {}
-                    File.WriteAllText(prvKeyPath, privateKey);
-                    File.WriteAllText(pubKeyPath, publicKey);
-                    
-                    Account newAccount = new Account(curHighestID+1, username, email, pubKeyPath, prvKeyPath);
-                    accounts.Add(newAccount);
-
-                    // //register private key
-                    // Process p1 = new Process
-                    // {
-                    //     StartInfo = 
-                    //     {
-                    //         FileName = "cmd.exe",
-                    //         Arguments = "/c start \"\" \"%PROGRAMFILES%\\Git\\bin\\sh.exe\" --login eval $(ssh-agent -s)"
-                    //     }
-                    // };
-                    // p1.Start();
-                    // p1.WaitForExit();
-                    // Process p2 = new Process
-                    // {
-                    //     StartInfo = 
-                    //     {
-                    //         FileName = "cmd.exe",
-                    //         Arguments = "/c start \"\" \"%PROGRAMFILES%\\Git\\bin\\sh.exe\" --login ssh-add" + prvKeyPath
-                    //     }
-                    // };
-                    // p2.Start();
-                    // p2.WaitForExit();
-
+                    prvKeyPath = path;
                     break;
                 }
-
-                counter++;
-                if(counter > 50) { throw new Exception("Could not find suitable name for key pair files. Try again"); }
             }
 
+            //add account
+            Account newAccount = new Account(curHighestID+1, username, email, prvKeyPath);
+            accounts.Add(newAccount);
+            
             SaveAccounts();
-            return publicKey;
         }
         static void SaveAccounts()
         {
@@ -315,5 +306,17 @@ namespace GAM
             using(StreamWriter streamWriter = new StreamWriter(accountsFilePath)) {}
             File.WriteAllText(accountsFilePath, json);
         }
+        static void RestoreSSHConfig()
+        {
+            string sshPath = "C:/Users/sebik/.ssh/";
+            string configName = "config";
+            Directory.CreateDirectory(sshPath);
+            using(StreamWriter wrt = new StreamWriter(sshPath + "/" + configName)) {}
+
+            string newConfigText = "Host github.com \n";
+            if(currentAccount == null) { Console.WriteLine("Can't restore SSH config because no account has been selected"); return; }
+            newConfigText += "IdentityFile " + currentAccount._privateKeyPath;
+            File.WriteAllText(sshPath + "/" + configName, newConfigText);
+        }   
     }
 }

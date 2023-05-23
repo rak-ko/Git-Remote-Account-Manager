@@ -11,8 +11,6 @@ namespace GAM
         [JsonProperty]
         string email;
         [JsonProperty]
-        string publicKeyPath;
-        [JsonProperty]
         string privateKeyPath;
 
         [JsonIgnore]
@@ -48,14 +46,6 @@ namespace GAM
             }
         }
         [JsonIgnore]
-        public string _publicKeyPath
-        {
-            get
-            {
-                return publicKeyPath;
-            }
-        }
-        [JsonIgnore]
         public string _privateKeyPath
         {
             get
@@ -64,12 +54,11 @@ namespace GAM
             }
         }
 
-        public Account(ulong ID, string username, string email, string publicKeyPath, string privateKeyPath)
+        public Account(ulong ID, string username, string email, string privateKeyPath)
         {
             this.ID = ID;
             this.username = username;
             this.email = email;
-            this.publicKeyPath = publicKeyPath;
             this.privateKeyPath = privateKeyPath;
         }
         public override string ToString()
