@@ -1,1 +1,11 @@
 # Github_account_manager
+## About
+- Simple command line app for managing git accounts.
+- Automatically sets ssh config.
+- **!!! The ssh config file will be completely overwritten. Put any of your custom config files into a 'customConfigs' folder !!!**
+
+## Installation
+1) Download the 'gam.exe' file from releases
+2) Put it inside a separate folder (Location doesn't matter)
+3) Add that folder's path to the PATH variable
+4) You can now call gam from anywhere
