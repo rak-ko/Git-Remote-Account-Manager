@@ -17,13 +17,15 @@ namespace GAM
         "-saveLoc Get .json account file location\n" +
         "-rConf Restores ssh config \n" +
         "-h Help";
-        const string accountsFilePath = "gamAccounts.json";
+        const string accountsFileName = "gamAccounts.json";
+        static string accountsFilePath = ""; 
 
         static Account? currentAccount;
         static List<Account> accounts = new List<Account>();
 
         static void Main(string[] args)
         {
+            accountsFilePath = AppDomain.CurrentDomain.BaseDirectory + "/" + accountsFileName;
             //load accounts
             if(File.Exists(accountsFilePath)) 
             { 
