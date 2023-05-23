@@ -1,6 +1,6 @@
 # Github Account Manager
 ## About
-- Simple command line app for managing git accounts
+- Simple command line app for managing github accounts
 - Automatically sets ssh config
 - Windows only
 - **!!! The ssh config file will be completely overwritten. Put any of your custom config files into a 'customConfigs' folder inside the default .ssh folder !!!**
