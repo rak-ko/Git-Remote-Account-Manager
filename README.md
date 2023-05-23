@@ -2,7 +2,13 @@
 ## About
 - Simple command line app for managing git accounts
 - Automatically sets ssh config
+- Windows only
 - **!!! The ssh config file will be completely overwritten. Put any of your custom config files into a 'customConfigs' folder !!!**
+
+## Requirements
+- Git
+- ssh-keygen command
+- 
 
 ## Installation
 1) Download the 'gam.exe' file from releases
