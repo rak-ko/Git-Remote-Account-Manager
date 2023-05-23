@@ -8,7 +8,6 @@
 ## Requirements
 - Git
 - ssh-keygen command
-- 
 
 ## Installation
 1) Download the 'gam.exe' file from releases
