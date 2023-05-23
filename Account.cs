@@ -52,6 +52,10 @@ namespace GAM
             {
                 return privateKeyPath;
             }
+            set
+            {
+                privateKeyPath = value;
+            }
         }
 
         public Account(ulong ID, string username, string email, string privateKeyPath)
@@ -63,7 +67,7 @@ namespace GAM
         }
         public override string ToString()
         {
-            return string.Format("[{0}] User: {1} Email: {2}", ID, username, email);
+            return string.Format("[{0}] \nUser: {1} \nEmail: {2} \nPrivate Key Path: {3}", ID, username, email, privateKeyPath);
         }
     }
 }

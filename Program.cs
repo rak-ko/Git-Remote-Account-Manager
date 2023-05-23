@@ -11,13 +11,14 @@ namespace GAM
         "-u Current use account\n" +
         "-s [account id] Set current account\n" +
         "-l List all accounts\n" +
-        "-i [file path] Import accounts from *.json file (Doesn't work [doesn't transfer ssh keys aka it's basically useless. Also this can cause duplicate ids])\n" +
+        // "-i [file path] Import accounts from *.json file (Doesn't work [doesn't transfer ssh keys aka it's basically useless. Also this can cause duplicate ids])\n" +
         "-e [account id] Edit user\n" +
         "-r [account id] Remove user\n" +
         "-saveLoc Get .json account file location\n" +
         "-rConf Restores ssh config \n" +
         "-h Help";
         const string accountsFileName = "gamAccounts.json";
+        const string sshConfigIncludesFolderName = "customConfigs";
         static string accountsFilePath = ""; 
 
         static Account? currentAccount;
@@ -104,12 +105,11 @@ namespace GAM
                     case "-saveLoc":
                         Console.WriteLine(Path.GetFullPath(accountsFilePath));
                         break;
-                    case "-i":
-                        ImportAccountConsole(args);
-                        break;
+                    // case "-i":
+                    //     ImportAccountConsole(args);
+                    //     break;
                     case "-rConf":
-                        RestoreSSHConfig();
-                        Console.WriteLine("SSH config restored");
+                        Console.WriteLine((RestoreSSHConfig()) ? "SSH config restored" : "Can't restore SSH config because no account has been selected");
                         break;
                     default:
                         Console.WriteLine("Unknown command");
@@ -158,23 +158,25 @@ namespace GAM
                 string? username = Console.ReadLine();
                 Console.Write("Enter new email (leave empty to keep current) >>> ");
                 string? email = Console.ReadLine();
+                Console.Write("Enter new private key path (leave empty to keep current) >>> ");
+                string? privateKeyPath = Console.ReadLine();
 
-                EditAccount(account, username, email);
+                EditAccount(account, username, email, privateKeyPath);
             }
             else { Console.WriteLine("ID not an integer"); return; }
         }
         static void RemoveAccountConsole(string[] args)
         {
-            //check if the user is sure
-            string code = new Random().Next(0, 6000).ToString();
-            Console.Write("To confirm removal please input this confirmation code '" + code + "' >>> ");
-            string? checkString = Console.ReadLine();
-            if(checkString == null || checkString != code) { Console.WriteLine("Entered incorrect confirmation code"); return; }
-
             //check args
             if(args.Length < 2) { Console.WriteLine("Not enough arguments"); return; }
             else
             {
+                //check if the user is sure
+                string code = new Random().Next(0, 6000).ToString();
+                Console.Write("To confirm removal please input this confirmation code '" + code + "' >>> ");
+                string? checkString = Console.ReadLine();
+                if(checkString == null || checkString != code) { Console.WriteLine("Entered incorrect confirmation code"); return; }
+
                 if(ulong.TryParse(args[1], out ulong id))
                 { 
                     bool result = RemoveAccount(id);
@@ -247,14 +249,16 @@ namespace GAM
             SaveAccounts();
             return true;
         }
-        static void EditAccount(Account account, string? username, string? email)
+        static void EditAccount(Account account, string? username, string? email, string? privateKeyPath)
         {
             if(username != null && username != "") { account._username = username; }
             if(email != null && email != "") { account._email = email; }
+            if(privateKeyPath != null && privateKeyPath != "") { account._privateKeyPath = privateKeyPath; }
 
             //update accounts
             SaveAccounts();
             if(account == currentAccount) { SetCurrentAccount(account._ID); }
+            RestoreSSHConfig();
         }
         static (bool, int) ImportAccount(string path)
         {
@@ -299,7 +303,7 @@ namespace GAM
             //add account
             Account newAccount = new Account(curHighestID+1, username, email, prvKeyPath);
             accounts.Add(newAccount);
-            
+            if(currentAccount == null) { SetCurrentAccount(newAccount._ID); }
             SaveAccounts();
         }
         static void SaveAccounts()
@@ -308,17 +312,19 @@ namespace GAM
             using(StreamWriter streamWriter = new StreamWriter(accountsFilePath)) {}
             File.WriteAllText(accountsFilePath, json);
         }
-        static void RestoreSSHConfig()
+        static bool RestoreSSHConfig()
         {
-            string sshPath = "C:/Users/sebik/.ssh/";
+            string sshPath = "C:/Users/"+ Environment.UserName +"/.ssh/";
             string configName = "config";
             Directory.CreateDirectory(sshPath);
             using(StreamWriter wrt = new StreamWriter(sshPath + "/" + configName)) {}
 
             string newConfigText = "Host github.com \n";
-            if(currentAccount == null) { Console.WriteLine("Can't restore SSH config because no account has been selected"); return; }
-            newConfigText += "IdentityFile " + currentAccount._privateKeyPath;
+            if(currentAccount == null) { return false; }
+            newConfigText += "IdentityFile " + currentAccount._privateKeyPath + "\n";
+            if(Directory.Exists(sshPath + sshConfigIncludesFolderName)) { newConfigText += "Include " + sshConfigIncludesFolderName + "/*"; }
             File.WriteAllText(sshPath + "/" + configName, newConfigText);
+            return true;
         }   
     }
 }
