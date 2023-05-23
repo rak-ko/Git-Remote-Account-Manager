@@ -3,7 +3,8 @@
 - Simple command line app for managing git accounts
 - Automatically sets ssh config
 - Windows only
-- **!!! The ssh config file will be completely overwritten. Put any of your custom config files into a 'customConfigs' folder !!!**
+- **!!! The ssh config file will be completely overwritten. Put any of your custom config files into a 'customConfigs' folder inside the default .ssh folder !!!**
+- **!!! All ssh keys have to be inside the default .ssh folder !!!**
 
 ## Requirements
 - Git
