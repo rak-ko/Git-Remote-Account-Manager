@@ -19,4 +19,4 @@
 5) You can now call 'gam' from anywhere
 
 ## Troubleshooting
-- If you get any 'access to the path x is denied' try either moving the program somewhere, where you don't need administrator priviliges to run. Or run the terminal with administrator rights
+- If you get any 'access to the path x is denied' try either moving the program somewhere, where you don't need administrator priviliges to run. Or run the terminal with administrator rights.
