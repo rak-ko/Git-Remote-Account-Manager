@@ -17,3 +17,6 @@
 3) Add that folder's path to the PATH variable
 4) If you have any ssh config files move them to a file named 'customConfigs' inside the .ssh folder and they will be included inside the automatic config
 5) You can now call 'gam' from anywhere
+
+## Troubleshooting
+- If you get any 'access to the path x is denied' try either moving the program somewhere, where you don't need administrator priviliges to run. Or run the terminal with administrator rights
