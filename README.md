@@ -1,4 +1,4 @@
-# Github_account_manager
+# Github Account Manager
 ## About
 - Simple command line app for managing git accounts
 - Automatically sets ssh config
