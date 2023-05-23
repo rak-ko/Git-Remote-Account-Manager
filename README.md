@@ -15,4 +15,4 @@
 2) Put it inside a separate folder (Location doesn't matter)
 3) Add that folder's path to the PATH variable
 4) If you have any ssh config files move them to a file named 'customConfigs' inside the .ssh folder and they will be included inside the automatic config
-5) You can now call gam from anywhere
+5) You can now call 'gam' from anywhere
