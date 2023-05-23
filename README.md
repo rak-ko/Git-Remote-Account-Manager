@@ -9,6 +9,7 @@
 ## Requirements
 - Git
 - ssh-keygen command
+- Ssh version above 7.3p1 (If you want to use your own ssh config files)
 
 ## Installation
 1) Download the 'gam.exe' file from releases
