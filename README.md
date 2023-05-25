@@ -2,7 +2,7 @@
 ## About
 - Simple command line app for managing github accounts
 - Automatically sets ssh config
-- Windows only
+- Windows/Linux (Mac probably doesn't work but you can try it)
 - **!!! The ssh config file will be completely overwritten. Put any of your custom config files into a 'customConfigs' folder inside the default .ssh folder !!!**
 - **!!! All ssh keys have to be inside the default .ssh folder !!!**
 
@@ -19,4 +19,4 @@
 5) You can now call 'gam' from anywhere
 
 ## Troubleshooting
-- If you get any 'access to the path x is denied' try either moving the program somewhere, where you don't need administrator priviliges to run (Like documents or the desktop). Or run the terminal with administrator rights.
+- If you get any 'access to the path x is denied' try either moving the program somewhere, where you don't need administrator privileges to run (Like documents or the desktop). Or run the terminal with administrator rights
