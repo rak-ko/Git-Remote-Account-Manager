@@ -30,7 +30,7 @@ namespace GAM
                         PrintCurrentAccount();
                         break;
                     case "-s":
-                        SetAccountConsole(args);
+                        SetAccountConsole();
                         break;
                     case "-c":
                         CreateAccountConsole(args);
@@ -65,18 +65,62 @@ namespace GAM
             if(Program.currentAccount == null) { Console.WriteLine("No account selected"); }
             else { Console.WriteLine(Program.currentAccount.ToString()); }
         }
-        public void SetAccountConsole(string[] args)
+        public void SetAccountConsole()
         {
-            if(args.Length < 2) { Console.WriteLine("Not enough arguments"); return; }
-            else
-            {
-                if(ulong.TryParse(args[1], out ulong id))
-                { 
-                    bool result = commands.SetCurrentAccount(id);
-                    Console.WriteLine((result) ? "Account changed" : "Account doesn't exist");
-                }
-                else { Console.WriteLine("ID is not an integer"); return; }
-            }
+            if(Program.accounts.Count == 0) { Console.WriteLine("No accounts registered yet"); return; }
+
+            AccountSelector((ulong id) => {  });
+            // //selection
+            // int curIndex = 0;
+            // Console.CursorVisible = false;
+            // while(true)
+            // {
+            //     bool selected = false;
+
+            //     //print accounts
+            //     Console.Clear();
+            //     for (int i = 0; i < Program.accounts.Count; i++) 
+            //     { 
+            //         string toPrint = Program.accounts[i].ToString(true);
+            //         if(Program.accounts[i] == Program.currentAccount)
+            //         {
+            //             Console.ForegroundColor = ConsoleColor.Yellow;
+            //             toPrint = "Selected: " + toPrint;
+            //         }
+            //         if(i == curIndex) 
+            //         {
+            //             Console.ForegroundColor = ConsoleColor.Blue;
+            //             toPrint = toPrint + "  <"; 
+            //         }
+            //         Console.WriteLine(toPrint);
+            //         Console.ResetColor();
+            //     }
+
+            //     //change selected
+            //     ConsoleKeyInfo pressed = Console.ReadKey(true);
+            //     switch (pressed.Key)
+            //     {
+            //         case ConsoleKey.UpArrow:
+            //             curIndex--;
+            //             if(curIndex < 0) { curIndex = Program.accounts.Count - 1; }
+            //             break;
+            //         case ConsoleKey.DownArrow:
+            //             curIndex++;
+            //             if(curIndex > Program.accounts.Count - 1) { curIndex = 0; }
+            //             break;
+            //         case ConsoleKey.Enter:
+            //             bool result = commands.SetCurrentAccount(Program.accounts[curIndex]._ID);
+            //             Console.Clear();
+            //             Console.ForegroundColor = ConsoleColor.Green;
+            //             Console.WriteLine((result) ? "Account changed" : "Account wasn't changed");
+            //             Console.ResetColor();
+            //             selected = true;
+            //             break;
+            //     }
+                
+            //     if(selected) { break; }
+            // }
+            // Console.CursorVisible = true;
         }
         public void CreateAccountConsole(string[] args)
         {
@@ -133,6 +177,53 @@ namespace GAM
                 (bool, int) result = commands.ImportAccount(args[1]);
                 Console.WriteLine((result.Item1) ? result.Item2 + " Account(s) imported" : "No accounts imported");
             }
+        }
+    
+        public void AccountSelector(Action<ulong> onEnter, Func<string, string>? onAccountIsCurrent = null)
+        {
+            //selection
+            int curIndex = 0;
+            Console.CursorVisible = false;
+            while(true)
+            {
+                bool selected = false;
+
+                //print accounts
+                Console.Clear();
+                for (int i = 0; i < Program.accounts.Count; i++) 
+                { 
+                    string toPrint = Program.accounts[i].ToString(true);
+                    if(onAccountIsCurrent != null) { toPrint = onAccountIsCurrent(toPrint); }
+                    if(i == curIndex) 
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        toPrint = toPrint + "  <"; 
+                    }
+                    Console.WriteLine(toPrint);
+                    Console.ResetColor();
+                }
+
+                //change selected
+                ConsoleKeyInfo pressed = Console.ReadKey(true);
+                switch (pressed.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        curIndex--;
+                        if(curIndex < 0) { curIndex = Program.accounts.Count - 1; }
+                        break;
+                    case ConsoleKey.DownArrow:
+                        curIndex++;
+                        if(curIndex > Program.accounts.Count - 1) { curIndex = 0; }
+                        break;
+                    case ConsoleKey.Enter:
+                        onEnter(Program.accounts[curIndex]._ID);
+                        selected = true;
+                        break;
+                }
+                
+                if(selected) { break; }
+            }
+            Console.CursorVisible = true;
         }
     }
 }

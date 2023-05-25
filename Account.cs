@@ -65,9 +65,12 @@ namespace GAM
             this.email = email;
             this.privateKeyPath = privateKeyPath;
         }
-        public override string ToString()
+        public string ToString(bool compact = false)
         {
-            return string.Format("[{0}] \nUser: {1} \nEmail: {2} \nPrivate Key Path: {3}", ID, username, email, privateKeyPath);
+            string toReturn = "";
+            if(compact) { toReturn = string.Format("[{0}] User: {1} Email: {2}", ID, username, email); }
+            else { toReturn = string.Format("[{0}] \nUser: {1} \nEmail: {2} \nPrivate Key Path: {3}", ID, username, email, privateKeyPath); }
+            return toReturn;
         }
     }
 }
