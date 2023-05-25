@@ -1,9 +1,5 @@
 ﻿namespace GAM
 {
-    //TODO: simpler key generation (ask for arguments and then pass them in yourself)
-    //TODO: use arrow keys to navigate instead of passing in the id
-    //TODO: when editing an account, use the same arrow key navigation for picking properties to edit
-
     class Program
     {
         public static Account? currentAccount;

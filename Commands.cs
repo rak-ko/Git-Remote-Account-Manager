@@ -14,33 +14,28 @@ namespace GAM
         const string linuxTerminalName = "/bin/bash";
         string terminalName = windowsTerminalName;
 
+        public string sshPath = "";
+
         public Commands()
         {
             //setup shell
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { terminalName = linuxTerminalName; }
+            
+            //setup sshPath
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { sshPath = "/home/"+ Environment.UserName +"/.ssh/"; }
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { sshPath = "C:/Users/"+ Environment.UserName +"/.ssh/"; }
+            else { sshPath = "/home/"+ Environment.UserName +"/.ssh/"; } //linux again
         }
         
-        public void CreateAccount(string username, string email)
+        public void CreateAccount(string username, string email, string keyFileName)
         {
             ulong curHighestID = (Program.accounts.Count > 0) ? Program.accounts.Max(x => x._ID) : 0;
 
             //generate ssh keys
-            RunCommand("ssh-keygen -t ed25519 -C \""+ email +"\"");
-            string prvKeyPath = "";
-            while(true)
-            {
-                Console.Write("Please enter the full path of your new private key >>> ");
-                string? path = Console.ReadLine();
-                if(path == null || !File.Exists(path)) { Console.WriteLine("Not a key"); }
-                else
-                {
-                    prvKeyPath = path;
-                    break;
-                }
-            }
+            RunCommand("ssh-keygen -t ed25519 -C \""+ email +"\"", false, new List<string>() { keyFileName });
 
             //add account
-            Account newAccount = new Account(curHighestID+1, username, email, prvKeyPath);
+            Account newAccount = new Account(curHighestID+1, username, email, keyFileName);
             Program.accounts.Add(newAccount);
             if(Program.currentAccount == null) { SetCurrentAccount(newAccount._ID); }
             SaveAccounts();
@@ -50,6 +45,7 @@ namespace GAM
             int index = Program.accounts.FindIndex(x => x._ID == id);
             if(index == -1) { return false; }
             Account account = Program.accounts[index];
+
             //set new current account
             if(Program.currentAccount == account && Program.accounts.Count > 0) 
             { 
@@ -62,6 +58,10 @@ namespace GAM
                     }
                 }
             }
+            //remove ssh key
+            File.Delete(account._privateKeyPath);
+            File.Delete(account._privateKeyPath + ".pub");
+
             Program.accounts.Remove(account);
             RestoreSSHConfig();
             SaveAccounts();
@@ -97,11 +97,6 @@ namespace GAM
         }
         public bool RestoreSSHConfig()
         {
-            string sshPath = "";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { sshPath = "/home/"+ Environment.UserName +"/.ssh/"; }
-            else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { sshPath = "C:/Users/"+ Environment.UserName +"/.ssh/"; }
-            else { sshPath = "/home/"+ Environment.UserName +"/.ssh/"; } //linux again
-
             string configName = "config";
             Directory.CreateDirectory(sshPath);
             using(StreamWriter wrt = new StreamWriter(sshPath + configName)) {}
@@ -176,14 +171,14 @@ namespace GAM
             }
         }
 
-        public string RunCommand(string command, bool getOutput = false)
+        public string RunCommand(string command, bool getOutput = false, List<string>? inputArguments = null)
         {
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { command = "-c " + command; }
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { command = "/c " + command; }
 
-            return RunCommand(terminalName, command, getOutput);
+            return RunCommand(terminalName, command, getOutput, inputArguments);
         }
-        public string RunCommand(string appName, string command, bool getOutput = false)
+        public string RunCommand(string appName, string command, bool getOutput = false, List<string>? inputArguments = null)
         {
             Process p = new Process
             {
@@ -201,6 +196,27 @@ namespace GAM
                 while (!p.StandardOutput.EndOfStream) { stdOut = p.StandardOutput.ReadToEnd(); }
                 p.WaitForExit();
                 return stdOut;
+            }
+            if(inputArguments != null)
+            {
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardInput = true;
+                p.StartInfo.RedirectStandardError = true;
+
+                int index = 0;
+                p.OutputDataReceived += (s, e) => {
+                    if(e.Data != null && index < inputArguments.Count)
+                    {
+                        p.StandardInput.WriteLine(inputArguments[index]);
+                        index++;
+                    }
+                };
+
+                p.Start();
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+                p.WaitForExit();
+                return "";
             }
 
             p.Start();

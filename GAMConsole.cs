@@ -4,11 +4,11 @@ namespace GAM
     {
         const string helpString = "-c [username] [email (connected to your remote git account)] Create new account\n" +
         "-u Current use account\n" +
-        "-s [account id] Set current account\n" +
+        "-s Set current account\n" +
         "-l List all accounts\n" +
         // "-i [file path] Import accounts from *.json file (Doesn't work [doesn't transfer ssh keys aka it's basically useless. Also this can cause duplicate ids])\n" +
-        "-e [account id] Edit user\n" +
-        "-r [account id] Remove user\n" +
+        "-e Edit user\n" +
+        "-r Remove user\n" +
         "-saveLoc Get .json account file location\n" +
         "-rConf Restores ssh config \n" +
         "-h Help";
@@ -21,43 +21,43 @@ namespace GAM
         public void RunCommand(string[] args)
         {
             string firstArg = args[0];
-                switch (firstArg)
-                {
-                    case "-h":
-                        Console.WriteLine(helpString);
-                        break;
-                    case "-u":
-                        PrintCurrentAccount();
-                        break;
-                    case "-s":
-                        SetAccountConsole();
-                        break;
-                    case "-c":
-                        CreateAccountConsole(args);
-                        break;
-                    case "-l":
-                        if(Program.accounts.Count == 0) { Console.WriteLine("No accounts registered yet"); }
-                        else { for (int i = 0; i < Program.accounts.Count; i++) { Console.WriteLine(Program.accounts[i].ToString()); }}
-                        break;
-                    case "-e":
-                        EditAccountConsole(args);
-                        break;
-                    case "-r":
-                        RemoveAccountConsole(args);
-                        break;
-                    case "-saveLoc":
-                        Console.WriteLine(commands.GetSaveFileLocation());
-                        break;
-                    // case "-i":
-                    //     ImportAccountConsole(args);
-                    //     break;
-                    case "-rConf":
-                        Console.WriteLine((commands.RestoreSSHConfig()) ? "SSH config restored" : "Can't restore SSH config because no account has been selected");
-                        break;
-                    default:
-                        Console.WriteLine("Unknown command");
-                        break;
-                }
+            switch (firstArg)
+            {
+                case "-h":
+                    Console.WriteLine(helpString);
+                    break;
+                case "-u":
+                    PrintCurrentAccount();
+                    break;
+                case "-s":
+                    SetAccountConsole();
+                    break;
+                case "-c":
+                    CreateAccountConsole(args);
+                    break;
+                case "-l":
+                    if(Program.accounts.Count == 0) { Console.WriteLine("No accounts registered yet"); }
+                    else { for (int i = 0; i < Program.accounts.Count; i++) { Console.WriteLine(Program.accounts[i].ToString()); }}
+                    break;
+                case "-e":
+                    EditAccountConsole(args);
+                    break;
+                case "-r":
+                    RemoveAccountConsole(args);
+                    break;
+                case "-saveLoc":
+                    Console.WriteLine(commands.GetSaveFileLocation());
+                    break;
+                // case "-i":
+                //     ImportAccountConsole(args);
+                //     break;
+                case "-rConf":
+                    Console.WriteLine((commands.RestoreSSHConfig()) ? "SSH config restored" : "Can't restore SSH config because no account has been selected");
+                    break;
+                default:
+                    Console.WriteLine("Unknown command");
+                    break;
+            }
         }
 
         public void PrintCurrentAccount()
@@ -69,75 +69,49 @@ namespace GAM
         {
             if(Program.accounts.Count == 0) { Console.WriteLine("No accounts registered yet"); return; }
 
-            AccountSelector((ulong id) => {  });
-            // //selection
-            // int curIndex = 0;
-            // Console.CursorVisible = false;
-            // while(true)
-            // {
-            //     bool selected = false;
-
-            //     //print accounts
-            //     Console.Clear();
-            //     for (int i = 0; i < Program.accounts.Count; i++) 
-            //     { 
-            //         string toPrint = Program.accounts[i].ToString(true);
-            //         if(Program.accounts[i] == Program.currentAccount)
-            //         {
-            //             Console.ForegroundColor = ConsoleColor.Yellow;
-            //             toPrint = "Selected: " + toPrint;
-            //         }
-            //         if(i == curIndex) 
-            //         {
-            //             Console.ForegroundColor = ConsoleColor.Blue;
-            //             toPrint = toPrint + "  <"; 
-            //         }
-            //         Console.WriteLine(toPrint);
-            //         Console.ResetColor();
-            //     }
-
-            //     //change selected
-            //     ConsoleKeyInfo pressed = Console.ReadKey(true);
-            //     switch (pressed.Key)
-            //     {
-            //         case ConsoleKey.UpArrow:
-            //             curIndex--;
-            //             if(curIndex < 0) { curIndex = Program.accounts.Count - 1; }
-            //             break;
-            //         case ConsoleKey.DownArrow:
-            //             curIndex++;
-            //             if(curIndex > Program.accounts.Count - 1) { curIndex = 0; }
-            //             break;
-            //         case ConsoleKey.Enter:
-            //             bool result = commands.SetCurrentAccount(Program.accounts[curIndex]._ID);
-            //             Console.Clear();
-            //             Console.ForegroundColor = ConsoleColor.Green;
-            //             Console.WriteLine((result) ? "Account changed" : "Account wasn't changed");
-            //             Console.ResetColor();
-            //             selected = true;
-            //             break;
-            //     }
-                
-            //     if(selected) { break; }
-            // }
-            // Console.CursorVisible = true;
+            AccountSelector((ulong id) => { 
+                bool result = commands.SetCurrentAccount(id);
+                Console.Clear();
+                Console.ForegroundColor = (result) ? ConsoleColor.Green : ConsoleColor.Red;
+                Console.WriteLine((result) ? "Account changed" : "Account wasn't changed");
+                Console.ResetColor(); 
+            }, (string toPrint) => {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                toPrint = "Selected: " + toPrint;
+                return toPrint;
+            });
         }
         public void CreateAccountConsole(string[] args)
         {
             if(args.Length < 3) { Console.WriteLine("Not enough arguments"); return; }
-            commands.CreateAccount(args[1], args[2]);
-            Console.WriteLine("Take the public key and add it to your git remote account");
+
+            //generate file name
+            string fileName = "";
+            int i = 0;
+            Random rnd = new Random();
+            while (true)
+            {
+                int extension = rnd.Next(int.MinValue, int.MaxValue);
+                fileName = commands.sshPath + args[1] + "_" + args[2] + "_" + extension;
+                if(!File.Exists(fileName)) { break; }
+
+                i++;
+                if(i > 50) { throw new Exception("Couldn't find suitable key name. Try running the command again"); }
+            }
+
+            commands.CreateAccount(args[1], args[2], fileName);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Take the public key at '"+ fileName +".pub' and add it to your git remote account");
+            Console.ResetColor();
         }
         public void EditAccountConsole(string[] args)
         {
-            if(args.Length < 2) { Console.WriteLine("Not enough arguments"); return; }
-            if(ulong.TryParse(args[1], out ulong id))
-            {
-                int index = Program.accounts.FindIndex(x => x._ID == id);
-                if(index == -1) { Console.WriteLine("Account doesn't exits"); return; }
+            AccountSelector((ulong id) => {
+                Account? account = Program.accounts.FirstOrDefault(x => x._ID == id);
+                if(account == null) { throw new NullReferenceException(); }
+                Console.Clear();
 
                 //get new values
-                Account account = Program.accounts[index];
                 Console.Write("Enter new username (leave empty to keep current) >>> ");
                 string? username = Console.ReadLine();
                 Console.Write("Enter new email (leave empty to keep current) >>> ");
@@ -146,28 +120,30 @@ namespace GAM
                 string? privateKeyPath = Console.ReadLine();
 
                 commands.EditAccount(account, username, email, privateKeyPath);
-            }
-            else { Console.WriteLine("ID not an integer"); return; }
+                Console.ResetColor();
+            });
         }
         public void RemoveAccountConsole(string[] args)
         {
-            //check args
-            if(args.Length < 2) { Console.WriteLine("Not enough arguments"); return; }
-            else
-            {
+            AccountSelector((ulong id) => {
+                Console.Clear();
+                Console.CursorVisible = true;
+
                 //check if the user is sure
                 string code = new Random().Next(0, 6000).ToString();
                 Console.Write("To confirm removal please input this confirmation code '" + code + "' >>> ");
                 string? checkString = Console.ReadLine();
                 if(checkString == null || checkString != code) { Console.WriteLine("Entered incorrect confirmation code"); return; }
 
-                if(ulong.TryParse(args[1], out ulong id))
-                { 
-                    bool result = commands.RemoveAccount(id);
-                    Console.WriteLine((result) ? "Account removed" : "Account doesn't exist");
-                }
-                else { Console.WriteLine("ID is not an integer"); return; }
-            }
+                bool result = commands.RemoveAccount(id);
+                Console.ForegroundColor = (result) ? ConsoleColor.Green : ConsoleColor.Red;
+                Console.WriteLine((result) ? "Account removed" : "Account doesn't exist");
+                Console.ResetColor(); 
+            }, (string toPrint) => {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                toPrint = "Selected: " + toPrint;
+                return toPrint;
+            });
         }
         public void ImportAccountConsole(string[] args)
         {
@@ -179,6 +155,8 @@ namespace GAM
             }
         }
     
+        /// <param name="onEnter">OnEnter(User id)</param>
+        /// <param name="onAccountIsCurrent">OnAccountIsCurrent(account.ToString()) | returns edited string</param>
         public void AccountSelector(Action<ulong> onEnter, Func<string, string>? onAccountIsCurrent = null)
         {
             //selection
@@ -193,11 +171,11 @@ namespace GAM
                 for (int i = 0; i < Program.accounts.Count; i++) 
                 { 
                     string toPrint = Program.accounts[i].ToString(true);
-                    if(onAccountIsCurrent != null) { toPrint = onAccountIsCurrent(toPrint); }
+                    if(Program.currentAccount == Program.accounts[i] && onAccountIsCurrent != null) { toPrint = onAccountIsCurrent(toPrint); }
                     if(i == curIndex) 
                     {
                         Console.ForegroundColor = ConsoleColor.Blue;
-                        toPrint = toPrint + "  <"; 
+                        toPrint = toPrint + "  <";
                     }
                     Console.WriteLine(toPrint);
                     Console.ResetColor();
