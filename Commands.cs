@@ -29,23 +29,17 @@ namespace GAM
         
         public void CreateAccount(string username, string email, string keyFileName)
         {
-            ulong curHighestID = (Program.accounts.Count > 0) ? Program.accounts.Max(x => x._ID) : 0;
-
             //generate ssh keys
             RunCommand("ssh-keygen -t ed25519 -C \""+ email +"\"", false, new List<string>() { keyFileName });
 
             //add account
-            Account newAccount = new Account(curHighestID+1, username, email, keyFileName);
+            Account newAccount = new Account(username, email, keyFileName);
             Program.accounts.Add(newAccount);
-            if(Program.currentAccount == null) { SetCurrentAccount(newAccount._ID); }
+            if(Program.currentAccount == null) { SetCurrentAccount(Program.accounts[Program.accounts.Count - 1]); }
             SaveAccounts();
         }
-        public bool RemoveAccount(ulong id)
+        public bool RemoveAccount(Account account)
         {
-            int index = Program.accounts.FindIndex(x => x._ID == id);
-            if(index == -1) { return false; }
-            Account account = Program.accounts[index];
-
             //set new current account
             if(Program.currentAccount == account && Program.accounts.Count > 0) 
             { 
@@ -53,7 +47,7 @@ namespace GAM
                 {
                     if(Program.accounts[i] != Program.currentAccount)
                     {
-                        SetCurrentAccount(Program.accounts[i]._ID);
+                        SetCurrentAccount(Program.accounts[i]);
                         break;
                     }
                 }
@@ -75,7 +69,7 @@ namespace GAM
 
             //update accounts
             SaveAccounts();
-            if(account == Program.currentAccount) { SetCurrentAccount(account._ID); }
+            if(account == Program.currentAccount) { SetCurrentAccount(account); }
             RestoreSSHConfig();
         }
         public (bool, int) ImportAccount(string path)
@@ -113,11 +107,9 @@ namespace GAM
             return Path.GetFullPath(accountsFilePath);
         }
         
-        public bool SetCurrentAccount(ulong id)
+        public bool SetCurrentAccount(Account account)
         {
-            int index = Program.accounts.FindIndex(x => x._ID == id);
-            if(index == -1) { return false; }
-            Program.currentAccount = Program.accounts[index];
+            Program.currentAccount = account;
 
             //change git
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))

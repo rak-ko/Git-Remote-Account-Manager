@@ -2,8 +2,6 @@
 {
     class Program
     {
-        //TODO: change -l account ids to relative (get rid of ids)
-        
         public static Account? currentAccount;
         public static List<Account> accounts = new List<Account>();
 

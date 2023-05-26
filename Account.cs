@@ -5,22 +5,12 @@ namespace GAM
     public class Account
     {
         [JsonProperty]
-        ulong ID;
-        [JsonProperty]
         string username;
         [JsonProperty]
         string email;
         [JsonProperty]
         string privateKeyPath;
 
-        [JsonIgnore]
-        public ulong _ID
-        {
-            get
-            {
-                return ID;
-            }
-        }
         [JsonIgnore]
         public string _username
         {
@@ -58,18 +48,17 @@ namespace GAM
             }
         }
 
-        public Account(ulong ID, string username, string email, string privateKeyPath)
+        public Account(string username, string email, string privateKeyPath)
         {
-            this.ID = ID;
             this.username = username;
             this.email = email;
             this.privateKeyPath = privateKeyPath;
         }
-        public string ToString(bool compact = false)
+        public string ToString(int index, bool compact = false)
         {
             string toReturn = "";
-            if(compact) { toReturn = string.Format("[{0}] User: {1} Email: {2}", ID, username, email); }
-            else { toReturn = string.Format("[{0}] \nUser: {1} \nEmail: {2} \nPrivate Key Path: {3}", ID, username, email, privateKeyPath); }
+            if(compact) { toReturn = string.Format("[{0}] User: {1} Email: {2}", index, username, email); }
+            else { toReturn = string.Format("[{0}] \nUser: {1} \nEmail: {2} \nPrivate Key Path: {3}", index, username, email, privateKeyPath); }
             return toReturn;
         }
     }
