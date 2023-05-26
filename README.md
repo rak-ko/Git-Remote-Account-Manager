@@ -2,7 +2,7 @@
 ## About
 - Simple command line app for managing github accounts
 - Automatically sets ssh config
-- Windows Only (Linux is working but you'll have to compile it yourself [Mac probably doesn't work but you can try it])
+- Windows/Linux
 - **!!! The ssh config file will be completely overwritten. Put any of your custom config files into a 'customConfigs' folder inside the default .ssh folder !!!**
 - **!!! All ssh keys have to be inside the default .ssh folder !!!**
 
