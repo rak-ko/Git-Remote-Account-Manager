@@ -30,7 +30,9 @@ namespace GAM
         public void CreateAccount(string username, string email, string keyFileName)
         {
             //generate ssh keys
-            RunCommand("ssh-keygen -t ed25519 -C \""+ email +"\"", false, new List<string>() { keyFileName });
+            RunCommand("ssh-keygen -t ed25519 -C \""+ email +"\"", false, new Dictionary<string, string>() { 
+                {"Enter file in which to save the key (/home/vojta/.ssh/id_rsa)", keyFileName} 
+            });
 
             //add account
             Account newAccount = new Account(username, email, keyFileName);
@@ -163,14 +165,14 @@ namespace GAM
             }
         }
 
-        public string RunCommand(string command, bool getOutput = false, List<string>? inputArguments = null)
+        public string RunCommand(string command, bool getOutput = false, Dictionary<string, string>? inputArguments = null)
         {
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { command = "-c " + command; }
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { command = "/c " + command; }
 
             return RunCommand(terminalName, command, getOutput, inputArguments);
         }
-        public string RunCommand(string appName, string command, bool getOutput = false, List<string>? inputArguments = null)
+        public string RunCommand(string appName, string command, bool getOutput = false, Dictionary<string, string>? inputArguments = null)
         {
             Process p = new Process
             {
@@ -197,9 +199,11 @@ namespace GAM
 
                 int index = 0;
                 p.OutputDataReceived += (s, e) => {
-                    if(e.Data != null && index < inputArguments.Count)
+                    Console.WriteLine("(Received) " + e.Data + " (END)");
+                    if(e.Data != null && inputArguments.TryGetValue(e.Data, out string? response) && response != null)
                     {
-                        p.StandardInput.WriteLine(inputArguments[index]);
+                        Console.WriteLine("(RESPONDED)");
+                        p.StandardInput.WriteLine(response);
                         index++;
                     }
                 };
@@ -208,6 +212,9 @@ namespace GAM
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.WaitForExit();
+                p.StandardOutput.Dispose();
+                p.StandardInput.Dispose();
+                p.StandardError.Dispose();
                 return "";
             }
 
