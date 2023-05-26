@@ -30,9 +30,9 @@ namespace GAM
         public void CreateAccount(string username, string email, string keyFileName)
         {
             //generate ssh keys
-            RunCommand("ssh-keygen -t ed25519 -C \""+ email +"\"", false, new Dictionary<string, string>() { 
-                {"Enter file in which to save the key (/home/vojta/.ssh/id_rsa)", keyFileName} 
-            });
+            string args = "-t ed25519 -C \""+ email +"\" -f \""+ keyFileName +"\"";
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { RunCommand("ssh-keygen", args); }
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { RunCommand("ssh-keygen " + args); }
 
             //add account
             Account newAccount = new Account(username, email, keyFileName);
@@ -165,14 +165,14 @@ namespace GAM
             }
         }
 
-        public string RunCommand(string command, bool getOutput = false, Dictionary<string, string>? inputArguments = null)
+        public string RunCommand(string command, bool getOutput = false)
         {
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { command = "-c " + command; }
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { command = "/c " + command; }
 
-            return RunCommand(terminalName, command, getOutput, inputArguments);
+            return RunCommand(terminalName, command, getOutput);
         }
-        public string RunCommand(string appName, string command, bool getOutput = false, Dictionary<string, string>? inputArguments = null)
+        public string RunCommand(string appName, string command, bool getOutput = false)
         {
             Process p = new Process
             {
@@ -182,6 +182,7 @@ namespace GAM
                     Arguments = command
                 }
             };
+
             if(getOutput)
             {
                 p.StartInfo.RedirectStandardOutput = true;
@@ -191,33 +192,6 @@ namespace GAM
                 p.WaitForExit();
                 return stdOut;
             }
-            if(inputArguments != null)
-            {
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardInput = true;
-                p.StartInfo.RedirectStandardError = true;
-
-                int index = 0;
-                p.OutputDataReceived += (s, e) => {
-                    Console.WriteLine("(Received) " + e.Data + " (END)");
-                    if(e.Data != null && inputArguments.TryGetValue(e.Data, out string? response) && response != null)
-                    {
-                        Console.WriteLine("(RESPONDED)");
-                        p.StandardInput.WriteLine(response);
-                        index++;
-                    }
-                };
-
-                p.Start();
-                p.BeginOutputReadLine();
-                p.BeginErrorReadLine();
-                p.WaitForExit();
-                p.StandardOutput.Dispose();
-                p.StandardInput.Dispose();
-                p.StandardError.Dispose();
-                return "";
-            }
-
             p.Start();
             p.WaitForExit();
             return "";

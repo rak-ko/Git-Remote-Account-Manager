@@ -58,7 +58,7 @@ namespace GAM
         {
             string toReturn = "";
             if(compact) { toReturn = string.Format("[{0}] User: {1} Email: {2}", index, username, email); }
-            else { toReturn = string.Format("[{0}] \nUser: {1} \nEmail: {2} \nPrivate Key Path: {3}", index, username, email, privateKeyPath); }
+            else { toReturn = string.Format("[{0}] \n - User: {1} \n - Email: {2} \n - Private Key Path: {3}", index, username, email, privateKeyPath); }
             return toReturn;
         }
     }
