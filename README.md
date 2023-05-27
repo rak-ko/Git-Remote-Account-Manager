@@ -28,3 +28,8 @@
 ## Troubleshooting
 - If you get any 'access to the path x is denied' try either moving the program somewhere, where you don't need administrator privileges to run (Like documents or the desktop). Or run the terminal with administrator rights
 - If it keeps getting flagged by your antivirus, try excluding the folder you put it in/the file itself
+
+## Todo
+- GUI
+- Mac support
+- Better installation process
