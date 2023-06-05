@@ -4,7 +4,7 @@
     {
         public static Account? currentAccount;
         public static List<Account> accounts = new List<Account>();
-        public static List<string> hostnames = new List<string>();
+        public static List<Host> hostnames = new List<Host>();
 
         static void Main(string[] args)
         {

@@ -2,14 +2,25 @@ namespace GAM
 {
     class GAMConsole
     {
-        const string helpString = "create [username] [email (connected to your remote git account)] Create new account\n" +
+        const string helpString =
+        "create [username] [email (connected to your remote git account)] Create new account\n" +
         "current Current use account\n" +
         "select Set current account\n" +
         "list List all accounts\n" +
         "edit Edit user\n" +
         "remove Remove user\n" +
+
+        "\n" +
+        "host add [new host (url e.g. 'Github.com')]\n" +
+        "host remove\n" +
+        "host edit\n" +
+
+        "\n" +
         "saveLoc Get .json account file location\n" +
+        "configLoc Get .json config file location\n" +
         "rConf Restores ssh config \n" +
+
+        "\n" +
         "help Help";
         Commands commands;
 
@@ -260,7 +271,8 @@ namespace GAM
 
         public void AddHostname(string[] args)
         {
-
+            if (args.Length < 1) { Console.WriteLine("Not enough arguments"); return; }
+            Program.hostnames.Add(args[0]);
         }
 
         public string GetPassphrase()

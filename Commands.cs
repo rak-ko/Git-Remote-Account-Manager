@@ -174,7 +174,7 @@ namespace GAM
             if (File.Exists(configFilePath))
             {
                 string json = File.ReadAllText(configFilePath);
-                Dictionary<string, List<string>>? tmp = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(json);
+                Dictionary<string, string>? tmp = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 if (tmp != null && tmp.ContainsKey("hostnames")) { Program.hostnames = tmp["hostnames"]; }
             }
             else
