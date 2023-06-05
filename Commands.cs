@@ -1,15 +1,16 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
-using System.Security;
 
 namespace GAM
 {
     public class Commands
     {
         const string accountsFileName = "gamAccounts.json";
+        const string configFileName = "gamConfig.json";
         const string sshConfigIncludesFolderName = "customConfigs";
         static string accountsFilePath = "";
+        static string configFilePath = "";
 
         const string windowsTerminalName = "cmd.exe";
         const string linuxTerminalName = "/bin/bash";
@@ -28,7 +29,7 @@ namespace GAM
             else { sshPath = "/home/" + Environment.UserName + "/.ssh/"; } //linux again
         }
 
-        public void CreateAccount(string username, string email, string keyFileName, string hostname, SecureString passphrase)
+        public void CreateAccount(string username, string email, string keyFileName, string hostname, string passphrase)
         {
             //generate ssh keys
             string args = "-t ed25519 -C \"" + email + "\" -f \"" + keyFileName + "\" -N " + passphrase;
@@ -164,6 +165,27 @@ namespace GAM
                     Program.currentAccount = Program.accounts[i];
                     break;
                 }
+            }
+        }
+
+        public void LoadHostnames()
+        {
+            configFilePath = AppDomain.CurrentDomain.BaseDirectory + "/" + configFileName;
+            if (File.Exists(configFilePath))
+            {
+                string json = File.ReadAllText(configFilePath);
+                Dictionary<string, List<string>>? tmp = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(json);
+                if (tmp != null && tmp.ContainsKey("hostnames")) { Program.hostnames = tmp["hostnames"]; }
+            }
+            else
+            {
+                File.Create(configFilePath);
+                Dictionary<string, List<string>> newConfig = new Dictionary<string, List<string>>();
+                newConfig.Add("hostnames", new List<string>() {
+                    "github.com",
+                    "gitlab.com"
+                });
+                File.WriteAllText(configFilePath, JsonConvert.SerializeObject(newConfig));
             }
         }
 

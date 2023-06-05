@@ -1,5 +1,3 @@
-using System.Security;
-
 namespace GAM
 {
     class GAMConsole
@@ -94,85 +92,6 @@ namespace GAM
                 return toPrint;
             });
         }
-        public void CreateAccountConsole(string[] args)
-        {
-            if (args.Length < 3) { Console.WriteLine("Not enough arguments"); return; }
-
-            //generate file name
-            string fileName = "";
-            int i = 0;
-            Random rnd = new Random();
-            while (true)
-            {
-                int extension = rnd.Next(int.MinValue, int.MaxValue);
-                fileName = commands.sshPath + args[1] + "_" + args[2] + "_" + extension;
-                if (!File.Exists(fileName)) { break; }
-
-                i++;
-                if (i > 50) { throw new Exception("Couldn't find suitable key name. Try running the command again"); }
-            }
-
-            //get passphrase
-            Console.Write("Input a passphrase >>> ");
-            SecureString passphrase = GetPassphrase();
-            Console.WriteLine();
-
-            commands.CreateAccount(args[1], args[2], fileName, "Github.com", passphrase);
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Take the public key at '" + fileName + ".pub' and add it to your git remote account");
-            Console.ResetColor();
-        }
-        public void EditAccountConsole(string[] args)
-        {
-            AccountSelector((int index) =>
-            {
-                Console.Clear();
-
-                //get new values
-                Console.Write("Enter new username (leave empty to keep current) >>> ");
-                string? username = Console.ReadLine();
-                Console.Write("Enter new email (leave empty to keep current) >>> ");
-                string? email = Console.ReadLine();
-                Console.Write("Enter new private key path (leave empty to keep current) >>> ");
-                string? privateKeyPath = Console.ReadLine();
-
-                commands.EditAccount(Program.accounts[index], username, email, privateKeyPath);
-                Console.ResetColor();
-            });
-        }
-        public void RemoveAccountConsole(string[] args)
-        {
-            AccountSelector((int index) =>
-            {
-                Console.Clear();
-                Console.CursorVisible = true;
-
-                //check if the user is sure
-                string code = new Random().Next(0, 6000).ToString();
-                Console.Write("To confirm removal please input this confirmation code '" + code + "' >>> ");
-                string? checkString = Console.ReadLine();
-                if (checkString == null || checkString != code) { Console.WriteLine("Entered incorrect confirmation code"); return; }
-
-                bool result = commands.RemoveAccount(Program.accounts[index]);
-                Console.ForegroundColor = (result) ? ConsoleColor.Green : ConsoleColor.Red;
-                Console.WriteLine((result) ? "Account removed" : "Account doesn't exist");
-                Console.ResetColor();
-            }, (string toPrint) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                toPrint = "Selected: " + toPrint;
-                return toPrint;
-            });
-        }
-        public void ImportAccountConsole(string[] args)
-        {
-            if (args.Length < 2) { Console.WriteLine("Not enough arguments"); return; }
-            else
-            {
-                (bool, int) result = commands.ImportAccount(args[1]);
-                Console.WriteLine((result.Item1) ? result.Item2 + " Account(s) imported" : "No accounts imported");
-            }
-        }
         /// <param name="onEnter">OnEnter(User index in list)</param>
         /// <param name="onAccountIsCurrent">OnAccountIsCurrent(account.ToString()) | returns edited string</param>
         public void AccountSelector(Action<int> onEnter, Func<string, string>? onAccountIsCurrent = null)
@@ -229,9 +148,124 @@ namespace GAM
             Console.CursorVisible = true;
         }
 
-        public SecureString GetPassphrase()
+        public void CreateAccountConsole(string[] args)
         {
-            SecureString pwd = new SecureString();
+            if (args.Length < 3) { Console.WriteLine("Not enough arguments"); return; }
+
+            //generate file name
+            string fileName = "";
+            int i = 0;
+            Random rnd = new Random();
+            while (true)
+            {
+                int extension = rnd.Next(int.MinValue, int.MaxValue);
+                fileName = commands.sshPath + args[1] + "_" + args[2] + "_" + extension;
+                if (!File.Exists(fileName)) { break; }
+
+                i++;
+                if (i > 50) { throw new Exception("Couldn't find suitable key name. Try running the command again"); }
+            }
+
+            //get passphrase
+            bool doingConfirmation = false;
+            string passphrase = "";
+            while (true)
+            {
+                bool confirmPassword = false;
+                if (!doingConfirmation)
+                {
+                    doingConfirmation = true;
+                    Console.Write("Input a passphrase (Leave empty for no passphrase) >>> ");
+                }
+                else
+                {
+                    Console.Write("Repeat your passphrase >>> ");
+                    doingConfirmation = false;
+                    confirmPassword = true;
+                }
+
+                string tmpPassphrase = GetPassphrase();
+                Console.WriteLine();
+                if (confirmPassword)
+                {
+                    if (tmpPassphrase == passphrase) { break; }
+                    else
+                    {
+                        Console.Write("Passphrase doesn't match... (Enter)");
+                        Console.ReadKey();
+                        Console.Clear();
+                    }
+                }
+                else { passphrase = tmpPassphrase; }
+            }
+            if (passphrase == "") { passphrase = "\"\""; }
+
+            commands.CreateAccount(args[1], args[2], fileName, "Github.com", passphrase);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Take the public key at '" + fileName + ".pub' and add it to your git remote account");
+            Console.WriteLine("Public key:\n" + File.ReadAllText(fileName + ".pub"));
+            Console.ResetColor();
+        }
+        public void EditAccountConsole(string[] args)
+        {
+            AccountSelector((int index) =>
+            {
+                Console.Clear();
+
+                //get new values
+                Console.Write("Enter new username (leave empty to keep current) >>> ");
+                string? username = Console.ReadLine();
+                Console.Write("Enter new email (leave empty to keep current) >>> ");
+                string? email = Console.ReadLine();
+                Console.Write("Enter new private key path (leave empty to keep current) >>> ");
+                string? privateKeyPath = Console.ReadLine();
+
+                commands.EditAccount(Program.accounts[index], username, email, privateKeyPath);
+                Console.ResetColor();
+            });
+        }
+        public void RemoveAccountConsole(string[] args)
+        {
+            AccountSelector((int index) =>
+            {
+                Console.Clear();
+                Console.CursorVisible = true;
+
+                //check if the user is sure
+                string code = new Random().Next(0, 6000).ToString();
+                Console.Write("To confirm removal please input this confirmation code '" + code + "' >>> ");
+                string? checkString = Console.ReadLine();
+                if (checkString == null || checkString != code) { Console.WriteLine("Entered incorrect confirmation code"); return; }
+
+                bool result = commands.RemoveAccount(Program.accounts[index]);
+                Console.ForegroundColor = (result) ? ConsoleColor.Green : ConsoleColor.Red;
+                Console.WriteLine((result) ? "Account removed" : "Account doesn't exist");
+                Console.ResetColor();
+            }, (string toPrint) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                toPrint = "Selected: " + toPrint;
+                return toPrint;
+            });
+        }
+        public void ImportAccountConsole(string[] args)
+        {
+            if (args.Length < 2) { Console.WriteLine("Not enough arguments"); return; }
+            else
+            {
+                (bool, int) result = commands.ImportAccount(args[1]);
+                Console.WriteLine((result.Item1) ? result.Item2 + " Account(s) imported" : "No accounts imported");
+            }
+        }
+
+        public void AddHostname(string[] args)
+        {
+
+        }
+
+        public string GetPassphrase()
+        {
+            string pwd = "";
             while (true)
             {
                 ConsoleKeyInfo i = Console.ReadKey(true);
@@ -243,13 +277,13 @@ namespace GAM
                 {
                     if (pwd.Length > 0)
                     {
-                        pwd.RemoveAt(pwd.Length - 1);
+                        pwd = pwd.Remove(pwd.Length - 1);
                         Console.Write("\b \b");
                     }
                 }
                 else if (i.KeyChar != '\u0000')
                 {
-                    pwd.AppendChar(i.KeyChar);
+                    pwd += i.KeyChar;
                     Console.Write("*");
                 }
             }
