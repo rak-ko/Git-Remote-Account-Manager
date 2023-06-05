@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace GAM
 {
-    public class Account
+    public class Account : IPrintable
     {
         [JsonProperty]
         string username;
@@ -11,7 +11,7 @@ namespace GAM
         [JsonProperty]
         string privateKeyPath;
         [JsonProperty]
-        string sshHostname;
+        int sshHostId;
 
         [JsonIgnore]
         public string _username
@@ -50,30 +50,32 @@ namespace GAM
             }
         }
         [JsonIgnore]
-        public string _sshHostname
+        public int _sshHostId
         {
             get
             {
-                return sshHostname;
+                return sshHostId;
             }
             set
             {
-                sshHostname = value;
+                sshHostId = value;
             }
         }
 
-        public Account(string username, string email, string privateKeyPath, string sshHostname)
+        public Account(string username, string email, string privateKeyPath, int sshHostId)
         {
             this.username = username;
             this.email = email;
             this.privateKeyPath = privateKeyPath;
-            this.sshHostname = sshHostname;
+            this.sshHostId = sshHostId;
         }
         public string ToString(int index, bool compact = false)
         {
             string toReturn = "";
-            if (compact) { toReturn = string.Format("[{0}] User: {1} Email: {2}", index, username, email); }
-            else { toReturn = string.Format("[{0}] \n - User: {1} \n - Email: {2} \n - Private Key Path: {3}", index, username, email, privateKeyPath); }
+            int hostIndex = Program.hosts.FindIndex(x => x._id == sshHostId);
+            string host = (hostIndex != -1) ? Program.hosts[hostIndex]._host : "Github.com";
+            if (compact) { toReturn = string.Format("[{0}] User: {1} Email: {2} Host: {3}", index, username, email, host); }
+            else { toReturn = string.Format("[{0}] \n - User: {1} \n - Email: {2} \n - Private Key Path: {3} \n - Host: {4}", index, username, email, privateKeyPath, host); }
             return toReturn;
         }
     }

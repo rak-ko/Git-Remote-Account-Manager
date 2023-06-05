@@ -4,7 +4,7 @@
     {
         public static Account? currentAccount;
         public static List<Account> accounts = new List<Account>();
-        public static List<Host> hostnames = new List<Host>();
+        public static List<Host> hosts = new List<Host>();
 
         static void Main(string[] args)
         {
@@ -16,7 +16,7 @@
             //setup
             commands.LoadAccounts();
             commands.LoadCurrentAccount();
-            commands.LoadHostnames();
+            commands.LoadConfig();
 
             //run cli
             if (args.Length > 0) { console.RunCommand(args); }
