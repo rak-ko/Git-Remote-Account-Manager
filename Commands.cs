@@ -227,7 +227,7 @@ namespace GAM
             {
                 //load hosts
                 if(config.ContainsKey("hosts")) 
-                { 
+                {
                     List<Host>? tmpHosts = JsonConvert.DeserializeObject<List<Host>>(config["hosts"]);
                     if(tmpHosts != null) { Program.hosts = tmpHosts; }
                 }

@@ -14,9 +14,9 @@
             GUI gui = new GUI();
 
             //setup
+            commands.LoadConfig();
             commands.LoadAccounts();
             commands.LoadCurrentAccount();
-            commands.LoadConfig();
 
             //run cli
             if (args.Length > 0) { console.RunCommand(args); }
