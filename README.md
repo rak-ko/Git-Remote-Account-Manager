@@ -1,4 +1,4 @@
-# Github Account Manager
+# Git Remote Account Manager
 ## About
 - Simple command line app for managing git remote accounts
 - Automatically sets ssh config
