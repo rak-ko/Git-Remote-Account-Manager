@@ -4,6 +4,7 @@
 - Automatically sets ssh config
 - Windows/Linux
 - **!!! All ssh keys have to be inside the default .ssh folder !!!**
+- test
 
 ## Requirements
 - Git
