@@ -1,6 +1,6 @@
 # Github Account Manager
 ## About
-- Simple command line app for managing github accounts
+- Simple command line app for managing git remote accounts
 - Automatically sets ssh config
 - Windows/Linux
 - **!!! All ssh keys have to be inside the default .ssh folder !!!**
