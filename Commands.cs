@@ -116,7 +116,7 @@ namespace GAM
             //add to main config
             if(!File.Exists(mainConfigPath)) { File.Create(mainConfigPath).Close(); }
             string configString = File.ReadAllText(mainConfigPath);
-            if(!configString.Contains("Include " + configPath)) { configString = "Include " + configPath + "\n" + configString; }
+            if(!configString.Contains("Include " + configName)) { configString = "Include " + configName + "\n" + configString; }
             File.WriteAllText(mainConfigPath, configString);
 
             return true;
@@ -255,12 +255,13 @@ namespace GAM
                 };
                 writer.Write(JsonConvert.SerializeObject(newConfig, Formatting.Indented));
             }
+            RestoreSSHConfig();
         }
         public string DefaultHosts()
         {
             return JsonConvert.SerializeObject(new List<Host>() { 
-                new Host(0, "Github.com"),
-                new Host(1, "Gitlab.com")
+                new Host(0, "github.com"),
+                new Host(1, "gitlab.com")
             }, Formatting.Indented);
         }
 
